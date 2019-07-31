@@ -1,0 +1,13 @@
+version: '3.0'
+services:
+  golang:
+    build:
+      context: ./docker-configuration
+      dockerfile: go-docker
+    container_name: golang_example
+    ports:
+      # <Port exposed> : < Port running inside container>
+      - 8021:3000
+    volumes:
+      - './src:/go/src/example_app:rw'
+    tty: true
