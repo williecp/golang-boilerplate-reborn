@@ -1,33 +1,72 @@
 package services
 
 import (
+	"sync"
 	"github.com/jinzhu/copier"
-	"github.com/lukmanralali/rl-ms-boilerplate-go/objects"
-	"github.com/lukmanralali/rl-ms-boilerplate-go/repositories"
+	httpEntity "example_app/entity/http"
+	dbEntity "example_app/entity/db"
+	APIEntity "example_app/entity/api"
+	repository "example_app/repository/db"
+	repositoryAPI "example_app/repository/api"
 )
 
 type UserService struct {
-	// userRepository repositories.V1UserRepositoryInterface
+	userRepository repository.UserRepositoryInterface
+	userRepositoryAPI repositoryAPI.FriendAPIRepositoryInterface
 }
 
-func User() UserService {
-	return V1UserService{repositories.V1UserRepositoryHandler()}
+func UserServiceHandler() UserService {
+	return UserService{
+		userRepository: repository.UserRepositoryHandler(),
+		userRepositoryAPI: repositoryAPI.ThirdPartyAPIHandler(),
+	}
 }
 
-type User interface {
-	GetById(id int)
-	GetAllUser(page int,count int)
-	UpdateById(id int)
+type UserServiceInterface interface {
+	GetUserByID(id int) httpEntity.UserDetailResponse
+	GetAllUser(page int,count int) []httpEntity.UserResponse
+	UpdateUserByID(id int) bool
 }
 
-func (service *V1UserService) GetById(id int){
+func (service *UserService) GetUserByID(id int, waitGroup *sync.WaitGroup) *httpEntity.UserDetailResponse{
+	waitGroup.Add(1)
+	user := &dbEntity.User{}
+	go service.userRepository.GetUserByID(id,user,waitGroup)
+
+	waitGroup.Add(1)
+	friend := &APIEntity.FriendResponse{}
+	go service.userRepositoryAPI.GetFriendID(id,friend,waitGroup)
 	
+	waitGroup.Wait()
+
+	result := &httpEntity.UserDetailResponse{}
+	if user != nil {
+		copier.Copy(result, user)
+		if nil != user.UserStatus{
+			result.Status = &user.UserStatus.Name
+		}
+		if friend != nil {
+			result.Avatar = &friend.Data.Avatar
+		}
+	}
+	return result
 }
 
-func (service *V1UserService) GetAllUser(page int,count int){
-
+func (service *UserService) GetAllUser(page int,count int) []httpEntity.UserResponse {
+	users, _ := service.userRepository.GetUsersList(page,count)
+	result := []httpEntity.UserResponse{}
+	copier.Copy(&result, &users)
+	return result
 }
 
-func (service *V1UserService) UpdateById(id int){
-
+func (service *UserService) UpdateUserByID(id int, payload httpEntity.UserRequest) bool {
+	user := &dbEntity.User{}
+	user.Name = payload.Name
+	user.IDCardNumber = payload.IDCardNumber
+	user.Address = payload.Address
+	err := service.userRepository.UpdateUserByID(id, user)
+	if nil != err {
+		return false
+	}
+	return true
 }

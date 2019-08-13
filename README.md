@@ -17,8 +17,23 @@ $ go build -tags 'mysql' -ldflags="-X main.Version=$(git describe --tags)" -o $G
 migrate -verbose -source file://path/relative_path -database dbdriver://host:port/database_name up
 atau
 migrate -verbose -source file://path/relative_path -database dbdriver:'//host:port/database_name' up
+atau
+migrate -verbose -source file://path/relative_path -database dbdriver:'//tcp(host:port)/database_name' up
 ```
 * contoh untuk membuat file migration
 ```bash
 migrate create -ext sql -dir path/absolute_path scheme_name_anything dbdriver://username:password@host:port/dbname?option1=true&option2=false
 ```
+
+__Test__<br>
+library yang digunakan [testify](https://github.com/stretchr/testify)
+* untuk melakukan test bisa dimulai dengan perintah berikut
+```bash
+go test -v -cover ./...
+atau
+go test -coverprofile=coverage.out ./...
+```
+* jika dirasa informasi coverage kurang lengkap, bisa dilanjutkan dengan perintah berikut
+```bash
+go tool cover -func=coverage.out
+```bash
