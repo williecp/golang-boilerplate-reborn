@@ -6,11 +6,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	services "example_app/service"
-	"fmt"
+	httpEntity "example_app/entity/http"
 )
 
 type UserController struct {
-	UserService services.UserService
+	UserService services.UserServiceInterface
 }
 
 func (handler *UserController) TestFunction(context *gin.Context) {
@@ -58,7 +58,13 @@ func (service *UserController) UpdateUsersByID(context *gin.Context) {
 			"message": "Bad Request",
 		})
 	}
-	fmt.Println(id)
-	// result := service.UserService.GetAllUser(queryparam.Limit, queryparam.Offset)
-	context.JSON(http.StatusOK, nil)
+	payload := httpEntity.UserRequest{}
+	if err := context.ShouldBind(&payload); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "Bad Request",
+		})
+		return
+	}
+	service.UserService.UpdateUserByID(id,payload)
+	context.JSON(http.StatusNoContent, gin.H{})
 } 

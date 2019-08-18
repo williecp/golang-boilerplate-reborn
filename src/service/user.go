@@ -15,17 +15,17 @@ type UserService struct {
 	userRepositoryAPI repositoryAPI.FriendAPIRepositoryInterface
 }
 
-func UserServiceHandler() UserService {
-	return UserService{
+func UserServiceHandler() *UserService {
+	return &UserService{
 		userRepository: repository.UserRepositoryHandler(),
 		userRepositoryAPI: repositoryAPI.ThirdPartyAPIHandler(),
 	}
 }
 
 type UserServiceInterface interface {
-	GetUserByID(id int) httpEntity.UserDetailResponse
+	GetUserByID(id int, waitGroup *sync.WaitGroup) *httpEntity.UserDetailResponse
 	GetAllUser(page int,count int) []httpEntity.UserResponse
-	UpdateUserByID(id int) bool
+	UpdateUserByID(id int, payload httpEntity.UserRequest) bool
 }
 
 func (service *UserService) GetUserByID(id int, waitGroup *sync.WaitGroup) *httpEntity.UserDetailResponse{

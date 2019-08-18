@@ -16,15 +16,12 @@ import (
 )
 
 // SETUP
-// GetUserByID(id int, userData *dbEntity.User, wg *sync.WaitGroup) error
-// UpdateUserByID(id int, userData *dbEntity.User) error
-// GetUsersList(limit int, offset int) ([]dbEntity.User, error)
 type repositoryDBMock struct {
 	mock.Mock
 }
 
 func (repository *repositoryDBMock) GetUserByID(id int, userData *modelDB.User, wg *sync.WaitGroup) error {
-	// repository.Called(id,userData,wg)
+	repository.Called(id,userData,wg)
 	userData.ID = uint(id)
 	userData.Name = "Test Name"
 	userData.IDCardNumber = "IDCARD123456789"
