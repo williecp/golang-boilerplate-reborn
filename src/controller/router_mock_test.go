@@ -23,3 +23,9 @@ func (rLoader *UserRouterLoader) UserRouterTestMock(router *gin.Engine){
 	rLoader.routerDefinition(router,handler)
 }
 
+func (rLoader *UserRouterLoader) UserRouterTestMock(router *gin.Engine){
+	handler := &V1ItemController{
+		V1ItemService: &UserServiceMock{},
+	}
+	rLoader.routerDefinition(router,handler)
+}

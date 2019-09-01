@@ -26,3 +26,18 @@ func (rLoader *UserRouterLoader) routerDefinition(router *gin.Engine,handler *Us
 	group.GET(":id", handler.GetUserByID)
 	group.PUT(":id", handler.UpdateUsersByID)
 }
+
+func (rLoader *UserRouterLoader) UserRouter(router *gin.Engine) {
+	handler := &V1ItemController{
+		V1ItemService: srv.UserServiceHandler(),
+	}
+	rLoader.routerDefinition(router,handler)
+}
+
+func (rLoader *UserRouterLoader) routerDefinition(router *gin.Engine,handler *V1ItemController) {
+	group := router.Group("v1/items")
+    group.GET("/id/:id", handler.GetByID)
+    group.POST("", handler.Create)
+    group.PUT(":id", handler.UpdateByID)
+    group.GET("/name/:name", handler.GetByName)
+}
